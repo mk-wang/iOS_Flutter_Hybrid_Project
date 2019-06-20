@@ -1,17 +1,19 @@
 #! /bin/bash
 
+# git repository path
+PRODUCT_GIT_DIR="$(dirname "$0")/../flutter_product"
+
 BUILD_MODE="debug"
 ARCHS_ARM="arm64,armv7"
 FLUTTER_ROOT=".flutter"
 PRODUCT_DIR="product"
 PRODUCT_ZIP="product.zip"
 FLUTTER_WRAPPER="./flutterw"
+FLUTTER_CMD="/opt/flutter/flutter_sdk/bin/flutter"
 
 BUILD_PATH=".build_ios/${BUILD_MODE}"
 PRODUCT_PATH="${BUILD_PATH}/${PRODUCT_DIR}"
 PRODUCT_APP_PATH="${PRODUCT_PATH}/Flutter"
-# git repository path
-PRODUCT_GIT_DIR="/xx/xx/x"
 
 usage() {
     echo
@@ -33,7 +35,7 @@ flutter_get_packages() {
     echo "================================="
     echo "Start get flutter app plugin"
 
-    if [ -e $FLUTTER_WRAPPER ]; then
+    if [ -e $FLUTTER_CMD ]; then
         echo 'flutterw installed' >/dev/null
     else
         bash -c "$(curl -fsSL https://raw.githubusercontent.com/passsy/flutter_wrapper/master/install.sh)"
@@ -43,7 +45,7 @@ flutter_get_packages() {
         fi
     fi
 
-    ${FLUTTER_WRAPPER} packages get --verbose
+    ${FLUTTER_CMD} packages get --verbose
     if [[ $? -ne 0 ]]; then
         EchoError "Failed to install flutter plugins."
         exit -1
@@ -94,9 +96,9 @@ build_flutter_app() {
 
         echo "Build archs: ${ARCHS_ARM}"
 
-        ${FLUTTER_WRAPPER} clean
+        ${FLUTTER_CMD} clean
 
-        ${FLUTTER_WRAPPER} build ios --${BUILD_MODE}
+        ${FLUTTER_CMD} build ios --${BUILD_MODE}
         
         if [[ $? -ne 0 ]]; then
             EchoError "Failed to build flutter app"
@@ -118,7 +120,7 @@ build_flutter_app() {
         fi
 
         # build bundle
-        ${FLUTTER_WRAPPER} --suppress-analytics \
+        ${FLUTTER_CMD} --suppress-analytics \
             --verbose \
             build bundle \
             --target-platform=ios \
@@ -177,12 +179,12 @@ flutter_copy_packages() {
                 local plugin_path_ios="${plugin_path}ios"
                 if [ -e ${plugin_path_ios} ]; then
                     if [ -s ${plugin_path_ios} ]; then
-						echo "copy plugin 'plugin_name' from '${plugin_path_ios}' to '${PRODUCT_PATH}/${plugin_name}'"
-						if [[ "${BUILD_MODE}" == "release" ]]; then
-							cp -rf ${plugin_path_ios} "${PRODUCT_PATH}/${plugin_name}"
-						else
-							ln -s ${plugin_path_ios} "${PRODUCT_PATH}/${plugin_name}"
-						fi
+                        echo "copy plugin 'plugin_name' from '${plugin_path_ios}' to '${PRODUCT_PATH}/${plugin_name}'"
+						    if [[ "${BUILD_MODE}" == "release" ]]; then
+								cp -rf ${plugin_path_ios} "${PRODUCT_PATH}/${plugin_name}"
+							else
+								ln -s ${plugin_path_ios} "${PRODUCT_PATH}/${plugin_name}"
+							fi
                     fi
                 fi
             fi
@@ -217,7 +219,7 @@ start_build() {
 
     rm -rf ${BUILD_PATH}
 
-    flutter_get_packages
+    #flutter_get_packages
 
     build_flutter_app
 
