@@ -1,19 +1,23 @@
 #! /bin/bash
 
 # git repository path
-PRODUCT_GIT_DIR="$(dirname "$0")/../flutter_product"
+
+if [ -z $FLUTTER_ROOT ];then
+	echo "set flutter sdk directory to environment FLUTTER_ROOT"
+fi
+
+FLUTTER_CMD="$FLUTTER_ROOT/bin/flutter"
 
 BUILD_MODE="debug"
 ARCHS_ARM="arm64,armv7"
-FLUTTER_ROOT=".flutter"
+
 PRODUCT_DIR="product"
 PRODUCT_ZIP="product.zip"
-FLUTTER_WRAPPER="./flutterw"
-FLUTTER_CMD="/opt/flutter/flutter_sdk/bin/flutter"
-
 BUILD_PATH=".build_ios/${BUILD_MODE}"
 PRODUCT_PATH="${BUILD_PATH}/${PRODUCT_DIR}"
 PRODUCT_APP_PATH="${PRODUCT_PATH}/Flutter"
+
+PRODUCT_GIT_DIR="$(dirname "$0")/../flutter_product"
 
 usage() {
     echo
